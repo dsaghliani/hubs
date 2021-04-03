@@ -123,5 +123,6 @@ AFRAME.registerSystem("hubs-systems", {
 
   remove() {
     this.cursorTargettingSystem.remove();
+    this.soundEffectsSystem.remove();
   }
 });

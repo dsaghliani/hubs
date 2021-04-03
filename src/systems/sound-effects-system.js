@@ -59,6 +59,7 @@ export class SoundEffectsSystem {
     this.pendingPositionalAudios = [];
     this.positionalAudiosStationary = [];
     this.positionalAudiosFollowingObject3Ds = [];
+    this.subscribedChannels = [];
 
     this.audioContext = THREE.AudioContext.getContext();
     this.scene = scene;
@@ -119,6 +120,10 @@ export class SoundEffectsSystem {
       }
       this.isDisabled = shouldBeDisabled;
     });
+
+    this.subscribeToDataChannel("playSoundOneShot", (_senderId, _dataType, data, _targetId) => {
+      this.playSoundOneShot(data);
+    });
   }
 
   enqueueSound(sound, loop) {
@@ -165,7 +170,10 @@ export class SoundEffectsSystem {
     return positionalAudio;
   }
 
-  playSoundOneShot(sound) {
+  playSoundOneShot(sound, networked = false) {
+    if (networked)
+      NAF.connection.broadcastDataGuaranteed("playSoundOneShot", sound);
+
     return this.enqueueSound(sound, false);
   }
 
@@ -264,6 +272,25 @@ export class SoundEffectsSystem {
         object3D.updateMatrices();
         setMatrixWorld(positionalAudio, object3D.matrixWorld);
       }
+    }
+  }
+
+  remove() {
+    this.unsubscribeFromAllDataChannels();
+  }
+
+  subscribeToDataChannel(dataType, callback) {
+    NAF.connection.subscribeToDataChannel(dataType, callback);
+    this.subscribedChannels.push(dataType);
+  }
+
+  unsubscribeFromAllDataChannels() {
+    let dataType;
+    while (true) {
+      dataType = this.subscribedChannels.pop();
+      if (typeof dataType === 'undefined')
+        break;
+      NAF.connection.unsubscribeToDataChannel(dataType);
     }
   }
 }

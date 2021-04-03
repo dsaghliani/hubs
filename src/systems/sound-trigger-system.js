@@ -8,7 +8,7 @@ export class SoundTriggerSystem {
       this.avatar = characterController.avatarRig;
     });
     this.sfxSystem = sfxSystem;
-    this.triggers = this.populateTriggers();
+    this.triggers = this.createTriggers();
   }
 
   tick() {
@@ -32,7 +32,7 @@ export class SoundTriggerSystem {
       const exited = !isInside && trigger.hasFired;
 
       if (entered) {
-        this.sfxSystem.playSoundOneShot(trigger.sound);
+        this.sfxSystem.playSoundOneShot(trigger.sound, true);
         trigger.hasFired = true;
       }
       
@@ -42,10 +42,10 @@ export class SoundTriggerSystem {
     }
   }
 
-  populateTriggers() {
+  // Temporary measure.
+  createTriggers() {
     return [
-      new Trigger(
-        new THREE.Vector3(-0.11575639550739468, 0.5759219704997984, 1.319775810614856), 1, SOUND_TEST, false)
+      new Trigger(new THREE.Vector3(-0.11575639550739468, 0.5759219704997984, 1.319775810614856), 1, SOUND_TEST, false)
     ];
   }
 }
