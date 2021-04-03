@@ -9,6 +9,14 @@ const forceEnableTouchscreen = hackyMobileSafariTest();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
+const triggers = [
+  {
+    position: '-0.116 0.576 1.32',
+    threshold: '1.0',
+    sound: 'SOUND_TEST',
+    isOneshot: 'false'
+  }
+];
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -78,6 +86,7 @@ export default class SceneEntryManager {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
+    this._createTriggers();
     this._setupPlayerRig();
     this._setupKicking();
     this._setupMedia(mediaStream);
@@ -553,6 +562,21 @@ export default class SceneEntryManager {
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
     this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
+
+  _createTriggers = () => {
+    for (const trigger of triggers) {
+      const entity = document.createElement('a-entity');
+      
+      entity.setAttribute('position', trigger.position);
+      entity.setAttribute('sound-trigger', {
+        sound: trigger.sound,
+        threshold: trigger.threshold,
+        isOneshot: trigger.isOneshot
+      });
+
+      this.scene.appendChild(entity);
+    }    
+  }
 
   _spawnAvatar = () => {
     this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");

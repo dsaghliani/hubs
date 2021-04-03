@@ -118,6 +118,7 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
+import "./components/sound-trigger";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";

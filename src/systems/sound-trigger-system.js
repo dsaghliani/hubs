@@ -1,6 +1,9 @@
-import { THREE } from "aframe";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { SOUND_TEST } from "./sound-effects-system"
+import { SOUND_TEST } from "./sound-effects-system";
+
+const SOUNDS = {
+  "SOUND_TEST": SOUND_TEST,
+};
 
 export class SoundTriggerSystem {
   constructor(characterController, sfxSystem) {
@@ -8,31 +11,27 @@ export class SoundTriggerSystem {
       this.avatar = characterController.avatarRig;
     });
     this.sfxSystem = sfxSystem;
-    this.triggers = this.createTriggers();
+    this.triggerEntities = [];
   }
 
   tick() {
-    if (typeof this.avatar === 'undefined') {
-      console.log("SOUND TRIGGER SYSTEM: AvatarRig not yet defined.");
+    if (typeof this.avatar === 'undefined' || typeof this.sfxSystem === 'undefined')
       return;
-    }
-
-    if (typeof this.sfxSystem === 'undefined') {
-      console.log("SOUND TRIGGER SYSTEM: SOUND EFFECTS SYSTEM undefined.");
-      return;
-    }
-
-    for (const trigger of this.triggers) {
+      
+    for (const entity of this.triggerEntities) {
+      const trigger = entity.components['sound-trigger'].data;
+      const triggerPosition = entity.object3D.position;
+      
       if (trigger.isOneshot && trigger.hasFired)
         continue;
       
-      const distance = this.avatar.object3D.position.distanceTo(trigger.position);
+      const distance = this.avatar.object3D.position.distanceTo(triggerPosition);
       const isInside = distance < trigger.threshold;
       const entered = isInside && !trigger.hasFired;
       const exited = !isInside && trigger.hasFired;
 
       if (entered) {
-        this.sfxSystem.playSoundOneShot(trigger.sound, true);
+        this.sfxSystem.playSoundOneShot(SOUNDS[trigger.sound], true);
         trigger.hasFired = true;
       }
       
@@ -42,20 +41,13 @@ export class SoundTriggerSystem {
     }
   }
 
-  // Temporary measure.
-  createTriggers() {
-    return [
-      new Trigger(new THREE.Vector3(-0.11575639550739468, 0.5759219704997984, 1.319775810614856), 1, SOUND_TEST, false)
-    ];
+  registerTrigger(entity) {
+    this.triggerEntities.push(entity);
   }
-}
 
-class Trigger {
-  constructor(position, threshold, sound, isOneshot) {
-    this.position = position;
-    this.threshold = threshold;
-    this.sound = sound;
-    this.isOneshot = isOneshot;
-    this.hasFired = false;
+  unregisterTrigger(entity) {
+    const areSame = (element) => element == entity; 
+    let index = this.triggerEntities.findIndex(areSame);
+    this.triggerEntities.splice(index, 1);
   }
 }
