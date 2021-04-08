@@ -11,10 +11,11 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const triggers = [
   {
-    position: '-0.116 0.576 1.32',
+    position: '-0.163, 0.44, 29.7',
     threshold: '1.0',
-    sound: 'SOUND_TEST',
-    isOneshot: 'false'
+    sound: 'DUA_2',
+    isOneshot: 'true',
+    isPositional: 'true'
   }
 ];
 
@@ -571,7 +572,8 @@ export default class SceneEntryManager {
       entity.setAttribute('sound-trigger', {
         sound: trigger.sound,
         threshold: trigger.threshold,
-        isOneshot: trigger.isOneshot
+        isOneshot: trigger.isOneshot,
+        isPositional: trigger.isPositional
       });
 
       this.scene.appendChild(entity);

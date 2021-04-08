@@ -1,8 +1,9 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { SOUND_TEST } from "./sound-effects-system";
+import { SOUND_DUA_1, SOUND_DUA_2 } from "./sound-effects-system";
 
 const SOUNDS = {
-  "SOUND_TEST": SOUND_TEST,
+  "DUA_1": SOUND_DUA_1,
+  "DUA_2": SOUND_DUA_2
 };
 
 export class SoundTriggerSystem {
@@ -31,7 +32,13 @@ export class SoundTriggerSystem {
       const exited = !isInside && trigger.hasFired;
 
       if (entered) {
-        this.sfxSystem.playSoundOneShot(SOUNDS[trigger.sound], true);
+        const sound = SOUNDS[trigger.sound];
+
+        if (trigger.isPositional)
+          this.sfxSystem.playPositionalSoundAt(sound, triggerPosition, false);
+        else
+          this.sfxSystem.playSoundOneShot(sound, true);
+  
         trigger.hasFired = true;
       }
       
