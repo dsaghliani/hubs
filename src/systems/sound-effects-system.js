@@ -15,7 +15,9 @@ import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
-import URL_TEST_SOUND from "../assets/sfx/test_sound.mp3"
+import URL_TEST_SOUND from "../assets/sfx/test_sound.mp3";
+import URL_DUA_1 from "../assets/sfx/dua1.mp3";
+import URL_DUA_2 from "../assets/sfx/dua2.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 
 let soundEnum = 0;
@@ -45,6 +47,8 @@ export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 export const SOUND_PREFERENCE_MENU_HOVER = soundEnum++;
 export const SOUND_SPAWN_EMOJI = soundEnum++;
 export const SOUND_TEST = soundEnum++;
+export const DUA_1 = soundEnum++;
+export const DUA_2 = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -90,7 +94,9 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
       [SOUND_PREFERENCE_MENU_HOVER, URL_FREEZE],
       [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI],
-      [SOUND_TEST, URL_TEST_SOUND]
+      [SOUND_TEST, URL_TEST_SOUND],
+      [DUA_1, URL_DUA_1],
+      [DUA_2, URL_DUA_2]
     ];
     const loading = new Map();
     const load = url => {
