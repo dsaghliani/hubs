@@ -2,6 +2,8 @@ import { setMatrixWorld } from "../utils/three-utils";
 import { getCurrentStreamer } from "../utils/component-utils";
 import { CAMERA_MODE_SCENE_PREVIEW } from "../systems/camera-system";
 
+const IDLE_LOBBY_CAMERA_MOVEMENT_ENABLED = false;
+
 function getStreamerCamera() {
   const streamer = getCurrentStreamer();
   if (streamer) {
@@ -66,35 +68,37 @@ AFRAME.registerComponent("scene-preview-camera", {
       this.el.object3D.translateZ(-0.1);
       this.el.object3D.matrixNeedsUpdate = true;
     } else {
-      let t = (performance.now() - this.startTime) / (1000.0 * this.data.duration);
-      t = Math.min(1.0, Math.max(0.0, t));
+        if (IDLE_LOBBY_CAMERA_MOVEMENT_ENABLED) {
+          let t = (performance.now() - this.startTime) / (1000.0 * this.data.duration);
+          t = Math.min(1.0, Math.max(0.0, t));
 
-      if (!this.ranOnePass) {
-        t = t * (2 - t);
-      } else {
-        t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      }
+          if (!this.ranOnePass) {
+            t = t * (2 - t);
+          } else {
+            t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          }
 
-      const from = this.backwards ? this.targetPoint : this.startPoint;
-      const to = this.backwards ? this.startPoint : this.targetPoint;
-      const fromRot = this.backwards ? this.targetRotation : this.startRotation;
-      const toRot = this.backwards ? this.startRotation : this.targetRotation;
+          const from = this.backwards ? this.targetPoint : this.startPoint;
+          const to = this.backwards ? this.startPoint : this.targetPoint;
+          const fromRot = this.backwards ? this.targetRotation : this.startRotation;
+          const toRot = this.backwards ? this.startRotation : this.targetRotation;
 
-      THREE.Quaternion.slerp(fromRot, toRot, newRot, t);
+          THREE.Quaternion.slerp(fromRot, toRot, newRot, t);
 
-      this.el.object3D.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
+          this.el.object3D.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
 
-      if (!this.data.positionOnly) {
-        this.el.object3D.rotation.setFromQuaternion(newRot);
-      }
+          if (!this.data.positionOnly) {
+            this.el.object3D.rotation.setFromQuaternion(newRot);
+          }
 
-      this.el.object3D.matrixNeedsUpdate = true;
+          this.el.object3D.matrixNeedsUpdate = true;
 
-      if (t >= 0.9999) {
-        this.ranOnePass = true;
-        this.backwards = !this.backwards;
-        this.startTime = performance.now();
-      }
+          if (t >= 0.9999) {
+            this.ranOnePass = true;
+            this.backwards = !this.backwards;
+            this.startTime = performance.now();
+          }
+        }
     }
   },
 
