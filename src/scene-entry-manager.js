@@ -13,7 +13,7 @@ const triggers = [
   {
     position: '-0.163, 0.44, 29.7',
     threshold: '1.0',
-    sound: 'DUA_2',
+    sound: 'DUA_1',
     isOneshot: 'true',
     isPositional: 'true'
   }
@@ -29,7 +29,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
-import { SOUND_DUA_1 } from "./systems/sound-effects-system";
+import { SOUND_DUA_2 } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
@@ -97,7 +97,7 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_1, this.avatarRig.object3D.position, false, true);
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, this.avatarRig.object3D.position, false, true);
 
     if (isBotMode) {
       this._runBot(mediaStream);
