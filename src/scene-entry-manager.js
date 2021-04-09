@@ -97,7 +97,7 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_1, this.avatarRig.object3D.position, false);
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_1, this.avatarRig.object3D.position, false, true);
 
     if (isBotMode) {
       this._runBot(mediaStream);

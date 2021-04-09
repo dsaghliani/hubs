@@ -35,7 +35,7 @@ export class SoundTriggerSystem {
         const sound = SOUNDS[trigger.sound];
 
         if (trigger.isPositional)
-          this.sfxSystem.playPositionalSoundAt(sound, triggerPosition, false);
+          this.sfxSystem.playPositionalSoundAt(sound, triggerPosition, false, true);
         else
           this.sfxSystem.playSoundOneShot(sound, true);
   

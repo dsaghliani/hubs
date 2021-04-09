@@ -125,7 +125,11 @@ export class SoundEffectsSystem {
     });
 
     this.subscribeToDataChannel("playSoundOneShot", (_senderId, _dataType, data, _targetId) => {
-      this.playSoundOneShot(data);
+      this.playSoundOneShot(data.sound);
+    });
+
+    this.subscribeToDataChannel("playPositionalSound", (_senderId, _dataType, data, _targetId) => {
+      this.playPositionalSoundAt(data.sound, data.position, data.loop);
     });
   }
 
@@ -158,9 +162,13 @@ export class SoundEffectsSystem {
     return positionalAudio;
   }
 
-  playPositionalSoundAt(sound, position, loop) {
+  playPositionalSoundAt(sound, position, loop, networked = false) {
     const positionalAudio = this.enqueuePositionalSound(sound, loop);
     if (!positionalAudio) return null;
+
+    if (networked)
+      NAF.connection.broadcastDataGuaranteed("playPositionalSound", { sound, position, loop });
+
     positionalAudio.position.copy(position);
     positionalAudio.matrixWorldNeedsUpdate = true;
     this.positionalAudiosStationary.push(positionalAudio);
@@ -175,8 +183,7 @@ export class SoundEffectsSystem {
 
   playSoundOneShot(sound, networked = false) {
     if (networked)
-      NAF.connection.broadcastDataGuaranteed("playSoundOneShot", sound);
-
+      NAF.connection.broadcastDataGuaranteed("playSoundOneShot", { sound });
     return this.enqueueSound(sound, false);
   }
 
