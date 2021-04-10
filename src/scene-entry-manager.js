@@ -18,6 +18,7 @@ const triggers = [
     isPositional: 'true'
   }
 ];
+const spawnPosition = new THREE.Vector3(-0.0026178609655924698, 0.442650442123413, -10.350022845726539);
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -30,6 +31,7 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
 import { SOUND_DUA_2 } from "./systems/sound-effects-system";
+import { THREE } from "aframe";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
@@ -97,7 +99,7 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, this.avatarRig.object3D.position, false, true);
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, spawnPosition, false, true);
 
     if (isBotMode) {
       this._runBot(mediaStream);
