@@ -27,17 +27,16 @@ export class SoundTriggerSystem {
         continue;
       
       const distance = this.avatar.object3D.position.distanceTo(triggerPosition);
-      const isInside = distance < trigger.threshold;
+      const isInside = distance < trigger.radius;
       const entered = isInside && !trigger.hasFired;
       const exited = !isInside && trigger.hasFired;
 
       if (entered) {
         const sound = SOUNDS[trigger.sound];
-
         if (trigger.isPositional)
-          this.sfxSystem.playPositionalSoundAt(sound, triggerPosition, false, true);
+          this.sfxSystem.playPositionalSoundAt(sound, triggerPosition, false, trigger.isNetworked, trigger.isInterruptible);
         else
-          this.sfxSystem.playSoundOneShot(sound, true);
+          this.sfxSystem.playSoundOneShot(sound, trigger.isNetworked);
   
         trigger.hasFired = true;
       }

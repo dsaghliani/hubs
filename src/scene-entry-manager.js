@@ -12,10 +12,12 @@ const qs = new URLSearchParams(location.search);
 const triggers = [
   {
     position: '-0.163, 0.44, 29.7',
-    threshold: '1.0',
+    radius: '1.0',
     sound: 'DUA_1',
-    isOneshot: 'true',
-    isPositional: 'true'
+    isOneshot: 'false',
+    isPositional: 'true',
+    isNetworked: 'true',
+    isInterruptible: 'false'
   }
 ];
 const spawnPosition = new THREE.Vector3(-0.0026178609655924698, 0.442650442123413, -10.350022845726539);
@@ -99,7 +101,11 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, spawnPosition, false, true);
+    const looped = false;
+    const networked = true;
+    const interruptible = false;
+    // this.avatarRig.object3D.position at this point evaluates to the origin vector, hence the manual spawnPosition.
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, spawnPosition, looped, networked, interruptible);
 
     if (isBotMode) {
       this._runBot(mediaStream);
@@ -573,9 +579,11 @@ export default class SceneEntryManager {
       entity.setAttribute('position', trigger.position);
       entity.setAttribute('sound-trigger', {
         sound: trigger.sound,
-        threshold: trigger.threshold,
+        radius: trigger.radius,
         isOneshot: trigger.isOneshot,
-        isPositional: trigger.isPositional
+        isPositional: trigger.isPositional,
+        isNetworked: trigger.isNetworked,
+        isInterruptible: trigger.isInterruptible
       });
 
       this.scene.appendChild(entity);

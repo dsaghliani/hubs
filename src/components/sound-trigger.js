@@ -1,9 +1,11 @@
 AFRAME.registerComponent('sound-trigger', {
   schema: {
     sound: {type: 'string', default: ''},
-    threshold: {type: 'number', default: '1.0'},
+    radius: {type: 'number', default: '1.0'},
     isOneshot: {type: 'boolean', default: 'true'},
-    isPositional: {type: 'boolean', default: 'false'}
+    isPositional: {type: 'boolean', default: 'false'},
+    isNetworked : {type: 'boolean', default: 'false'},
+    isInterruptible: {type: 'boolean', default: 'false'}
   },
 
   init() {

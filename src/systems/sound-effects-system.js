@@ -62,6 +62,7 @@ export class SoundEffectsSystem {
     this.positionalAudiosStationary = [];
     this.positionalAudiosFollowingObject3Ds = [];
     this.subscribedChannels = [];
+    this.playingNonInterruptibles = [];
 
     this.audioContext = THREE.AudioContext.getContext();
     this.scene = scene;
@@ -129,7 +130,7 @@ export class SoundEffectsSystem {
     });
 
     this.subscribeToDataChannel("playPositionalSound", (_senderId, _dataType, data, _targetId) => {
-      this.playPositionalSoundAt(data.sound, data.position, data.loop);
+      this.playPositionalSoundAt(data.sound, data.position, data.loop, false, data.interruptible);
     });
   }
 
@@ -162,16 +163,27 @@ export class SoundEffectsSystem {
     return positionalAudio;
   }
 
-  playPositionalSoundAt(sound, position, loop, networked = false) {
+  playPositionalSoundAt(sound, position, loop, networked = false, interruptible = true) {
+    if (!interruptible && this.playingNonInterruptibles.includes(sound))
+      return;
+
     const positionalAudio = this.enqueuePositionalSound(sound, loop);
     if (!positionalAudio) return null;
-
-    if (networked)
-      NAF.connection.broadcastDataGuaranteed("playPositionalSound", { sound, position, loop });
-
+    
     positionalAudio.position.copy(position);
     positionalAudio.matrixWorldNeedsUpdate = true;
     this.positionalAudiosStationary.push(positionalAudio);
+
+    if (networked)
+      NAF.connection.broadcastDataGuaranteed("playPositionalSound", { sound, position, loop, interruptible });
+
+    if (!interruptible) {
+      this.playingNonInterruptibles.push(sound);
+      positionalAudio.onEnded = () => {
+        const index = this.playingNonInterruptibles.length - 1;
+        this.playingNonInterruptibles.splice(index, 1);
+      };
+    }
   }
 
   playPositionalSoundFollowing(sound, object3D, loop) {
