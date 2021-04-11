@@ -14,7 +14,7 @@ const triggers = [
     position: '-0.163, 0.44, 29.7',
     radius: '1.0',
     sound: 'DUA_1',
-    isOneshot: 'false',
+    isOneshot: 'true',
     isPositional: 'true',
     isNetworked: 'true',
     isInterruptible: 'false'
