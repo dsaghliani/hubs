@@ -9,18 +9,6 @@ const forceEnableTouchscreen = hackyMobileSafariTest();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
-const triggers = [
-  {
-    position: '-0.163, 0.44, 29.7',
-    radius: '1.0',
-    sound: 'DUA_1',
-    isOneshot: 'true',
-    isPositional: 'true',
-    isNetworked: 'true',
-    isInterruptible: 'false'
-  }
-];
-const spawnPosition = new THREE.Vector3(-0.0026178609655924698, 0.442650442123413, -10.350022845726539);
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -32,7 +20,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
-import { SOUND_DUA_2 } from "./systems/sound-effects-system";
+import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { THREE } from "aframe";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -91,7 +79,6 @@ export default class SceneEntryManager {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
-    this._createTriggers();
     this._createWater();
     this._setupPlayerRig();
     this._setupKicking();
@@ -102,11 +89,9 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    const looped = false;
-    const networked = true;
-    const interruptible = false;
-    // this.avatarRig.object3D.position at this point evaluates to the origin vector, hence the manual spawnPosition.
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundAt(SOUND_DUA_2, spawnPosition, looped, networked, interruptible);
+    const disableSpawnSound = document.querySelector("[disable-spawn-sfx]");
+    if (disableSpawnSound == null)
+      this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE, false);
 
     if (isBotMode) {
       this._runBot(mediaStream);
@@ -572,24 +557,6 @@ export default class SceneEntryManager {
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
     this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
-
-  _createTriggers = () => {
-    for (const trigger of triggers) {
-      const entity = document.createElement('a-entity');
-      
-      entity.setAttribute('position', trigger.position);
-      entity.setAttribute('sound-trigger', {
-        sound: trigger.sound,
-        radius: trigger.radius,
-        isOneshot: trigger.isOneshot,
-        isPositional: trigger.isPositional,
-        isNetworked: trigger.isNetworked,
-        isInterruptible: trigger.isInterruptible
-      });
-
-      this.scene.appendChild(entity);
-    }    
-  }
 
   _createWater = () => {
     const waterEntity = document.createElement('a-entity');

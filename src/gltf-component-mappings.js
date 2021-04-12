@@ -23,6 +23,7 @@ registerRootSceneComponent("fog");
 registerRootSceneComponent("background");
 
 AFRAME.GLTFModelPlus.registerComponent("sound-trigger", "sound-trigger");
+AFRAME.GLTFModelPlus.registerComponent("disable-spawn-sfx", "disable-spawn-sfx");
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });

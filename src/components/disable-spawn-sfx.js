@@ -1,0 +1,1 @@
+AFRAME.registerComponent("disable-spawn-sfx", {});
