@@ -21,7 +21,7 @@ export class SoundTriggerSystem {
       
     for (const entity of this.triggerEntities) {
       const trigger = entity.components['sound-trigger'].data;
-      const triggerPosition = entity.object3D.position;
+      const triggerPosition = entity.object3D.getWorldPosition();
       
       if (trigger.isOneshot && trigger.hasFired)
         continue;
