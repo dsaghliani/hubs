@@ -30,7 +30,6 @@ import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
-import { SoundTriggerSystem } from "./sound-trigger-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -70,7 +69,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.shadowSystem = new ShadowSystem(this.el);
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
-    this.soundTriggerSystem = new SoundTriggerSystem(this.characterController, this.soundEffectsSystem);
   },
 
   tick(t, dt) {
@@ -115,7 +113,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     this.mediaFramesSystem.tick();
-    this.soundTriggerSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
@@ -123,6 +120,5 @@ AFRAME.registerSystem("hubs-systems", {
 
   remove() {
     this.cursorTargettingSystem.remove();
-    this.soundEffectsSystem.remove();
   }
 });
