@@ -79,7 +79,6 @@ export default class SceneEntryManager {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
-    this._createWater();
     this._setupPlayerRig();
     this._setupKicking();
     this._setupMedia(mediaStream);
@@ -557,28 +556,6 @@ export default class SceneEntryManager {
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
     this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
-
-  _createWater = () => {
-    const waterEntity = document.createElement('a-entity');
-
-    waterEntity.setAttribute('simple-water-octagonal', {
-      color: "#0EC5FA",
-      waveHeight: 0.12,
-      waveScale: { x: 10, y: 10 },
-      waveSpeed: { x: 1, y: 1 },
-      ripplesScale: 0.1
-    });
-
-    waterEntity.object3D.position.x = -0.1944896159036165;
-    waterEntity.object3D.position.y = 1.0383978206621807;
-    waterEntity.object3D.position.z = 16.790611040486127;
-
-    waterEntity.object3D.scale.x = 0.27;
-    waterEntity.object3D.scale.y = 0.27;
-    waterEntity.object3D.scale.z = 0.27;
-
-    this.scene.appendChild(waterEntity);
-  }
 
   _spawnAvatar = () => {
     this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
