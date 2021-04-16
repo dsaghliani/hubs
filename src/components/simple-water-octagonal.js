@@ -31,7 +31,6 @@ class Octave {
 }
 export default class SimpleWaterOctagonal extends Mesh {
   constructor(normalMap, resolution = 24, lowQuality = false) {
-    console.log("Oct. constructor called!");
     const apothem = 5;
     const sides = 8;
     const theta = Math.PI / sides;
