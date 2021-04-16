@@ -32,6 +32,7 @@ import {
   migrateChannelToSocket
 } from "./utils/phoenix-utils";
 
+import "./utils/video-controller";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
