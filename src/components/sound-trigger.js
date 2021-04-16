@@ -10,6 +10,7 @@ AFRAME.registerComponent('sound-trigger', {
   schema: {
     sound: {type: 'string', default: ''},
     radius: {type: 'number', default: '1.0'},
+    hasFired: {type: 'boolean', default: 'false'},
     isOneshot: {type: 'boolean', default: 'true'},
     isPositional: {type: 'boolean', default: 'false'},
     isNetworked : {type: 'boolean', default: 'false'},
@@ -48,6 +49,6 @@ AFRAME.registerComponent('sound-trigger', {
     
     // Since there's already an isOneshot check at the top, it can be skipped here.
     if (exited)
-      this.el.setAttribute("sound-trigger", "hasFired", "true");
+      this.el.setAttribute("sound-trigger", "hasFired", "false");
   }
 });
