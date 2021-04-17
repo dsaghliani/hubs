@@ -32,12 +32,13 @@ import {
   migrateChannelToSocket
 } from "./utils/phoenix-utils";
 
-import "./utils/video-controller";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
+import { VideoController } from "./utils/video-controller";
+const videoController = new VideoController();
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
