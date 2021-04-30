@@ -53,11 +53,11 @@ export class VideoController {
     setVideoStatus(screen, enabled) {
         screen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
         screen.setAttribute('visible', enabled ? true : false);
-    }
+    } 
     
     sendReminder() {
         const payload = { 'action': 'remind' };
-        socket.send(JSON.stringify(payload));
+        this.socket.send(JSON.stringify(payload));
         console.log('Sent a check-in message:', payload);
     }
 
