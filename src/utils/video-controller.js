@@ -11,13 +11,12 @@ export class VideoController {
         this.socket = new WebSocket(WEB_SOCKET_URL);
 
         this.socket.onopen = _e => {
-            console.log('Connected to the WebSocket.')
-            this.checkInInterval = setInterval(this.sendReminder, INTERVAL_DURATION * 1000);
+            console.log('Connected to the WebSocket.');
+            this.checkInInterval = setInterval(() => this.sendReminder(), INTERVAL_DURATION * 1000);
         };
         
         this.socket.onclose = _e => {
-            console.log('Disconnected from the WebSocket')
-            clearInterval(this.checkInInterval);
+            console.log('Disconnected from the WebSocket');
         };
         
         this.socket.onmessage = e => {
@@ -47,7 +46,9 @@ export class VideoController {
     }
 
     disconnect() {
+        console.log("Manually disconnecting from the WebSocket.");
         this.socket.close(1000);
+        clearInterval(this.checkInInterval);
     }
 
     setVideoStatus(screen, enabled) {
