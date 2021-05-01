@@ -2,9 +2,6 @@
 // server, in the name of keeping the connection alive. Disconnection seems to happen in ~600 seconds.
 const INTERVAL_DURATION = 500;
 const WEB_SOCKET_URL = 'wss://qceh63bc59.execute-api.eu-west-1.amazonaws.com/production';
-// MAIN_SCREEN_ID: Eventually, when multiple screens are present, screen ID can be incorporated into the
-// WebSocket-delivered commands. Until then, it's simpler to keep the sole ID in a constant.
-const MAIN_SCREEN_ID = 'naf-20BD6EAF-D619-44EE-8222-5A2019D21AC3';
 
 export class VideoController {
     constructor() {
@@ -30,17 +27,17 @@ export class VideoController {
             }
 
             const command = data.command;
-            const screen = this.findScreen(MAIN_SCREEN_ID);
+            const screen = this.findScreen();
             
-            switch (command) {
-                case 'enable':
-                    this.setVideoStatus(screen, true);
-                    break;
-                case 'disable':
-                    this.setVideoStatus(screen, false);
-                    break;
-                default:
-                    console.log('Received an unknown command:', command);
+            for (const key in command) {
+                switch(key) {
+                    case 'newUrl':
+                        this.setVideoUrl(screen, command[key]);
+                        break;
+                    case 'newStatus':
+                        this.setVideoStatus(screen, command[key]);
+                        break;
+                }
             }
         };
     }
@@ -54,7 +51,11 @@ export class VideoController {
     setVideoStatus(screen, enabled) {
         screen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
         screen.setAttribute('visible', enabled ? true : false);
-    } 
+    }
+
+    setVideoUrl(screen, newUrl) {
+        screen.setAttribute('media-loader', 'src', newUrl);
+    }
     
     sendReminder() {
         const payload = { 'action': 'remind' };
@@ -62,7 +63,8 @@ export class VideoController {
         console.log('Sent a check-in message:', payload);
     }
 
-    findScreen(screenId) { 
-        return document.querySelector(`#${screenId}`);
+    // TODO change later!
+    findScreen() { 
+        return document.querySelector('[media-video]'); 
     }
 }
