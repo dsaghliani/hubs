@@ -139,24 +139,6 @@ export function coerceToUrl(urlOrText) {
   return urlOrText.indexOf("://") >= 0 ? urlOrText : `https://${urlOrText}`;
 }
 
-export const addMediaWithTransform = (
-  transform,
-  timeoutDuration,
-  ...addMediaParams
-) => {
-  const { entity, orientation } = addMedia(...addMediaParams);
-  setTimeout(() => {
-    entity.object3D.position.set(transform.position.x, transform.position.y, transform.position.z);
-    entity.object3D.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
-    entity.object3D.rotation.set(
-      THREE.Math.degToRad(transform.rotation.x),
-      THREE.Math.degToRad(transform.rotation.y),
-      THREE.Math.degToRad(transform.rotation.z)
-    );
-  }, timeoutDuration);
-  return { entity, orientation };
-}
-
 export const addMedia = (
   src,
   template,

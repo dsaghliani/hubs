@@ -40,7 +40,6 @@ import "./naf-dialog-adapter";
 import { VideoController } from "./utils/video-controller";
 
 const videoController = new VideoController();
-import { ObjectContentOrigins } from "./object-types";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -139,7 +138,6 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
-import { addMediaWithTransform } from "./utils/media-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
@@ -1113,49 +1111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
   };
 
-  const createScreenIfNeeded = () => {
-    // Fetch the latest URL.
-    const apiUrl = "https://jokias1k6b.execute-api.eu-west-1.amazonaws.com/production";
-    
-    const timeOut = 5000;
-    const transform = {
-      position: { x: -0.256, y: 4.45,  z: 56.4 },
-      rotation: { x: 0,      y: -180,  z: 0 },
-      scale:    { x: 3.078,  y: 5.078, z: 5.078 }
-    };
-    const addMediaParams = {
-      src: '',
-      template: "#interactable-media",
-      contentOrigin: ObjectContentOrigins.URL,
-      contentSubtype: null,
-      resolve: true,
-      fitToBox: true,
-      animate: false,
-      mediaOptions: {},
-      networked: false,
-      parentEl: null,
-      linkedEl: null
-    }
-
-    fetch(apiUrl)
-      .then(res => {
-        if (res.ok) {
-          res.json()
-            .then(url => {
-              addMediaParams.src = url;
-              addMediaWithTransform(transform, timeOut, ...(Object.values(addMediaParams)));
-            });
-        } else
-          console.error("Unable to fetch the latest video URL from the API.");
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
-
-  environmentScene.addEventListener("model-loaded", createScreenIfNeeded);
 
   environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {

@@ -2,6 +2,7 @@
 // server, in the name of keeping the connection alive. Disconnection seems to happen in ~600 seconds.
 const INTERVAL_DURATION = 500;
 const WEB_SOCKET_URL = 'wss://qceh63bc59.execute-api.eu-west-1.amazonaws.com/production';
+const SCREEN_ID = 'naf-20BD6EAF-D619-44EE-8222-5A2019D21AC3';
 
 export class VideoController {
     constructor() {
@@ -9,13 +10,16 @@ export class VideoController {
 
         this.socket.onopen = _e => {
             console.log('Connected to the WebSocket.');
+
+            // It's important to call `this.sendReminder()` this way, instead of simply passing it in, or else `this` won't be bound correctly.
             this.checkInInterval = setInterval(() => this.sendReminder(), INTERVAL_DURATION * 1000);
         };
         
         this.socket.onclose = _e => {
             console.log('Disconnected from the WebSocket');
+            clearInterval(this.checkInInterval);
         };
-        
+
         this.socket.onmessage = e => {
             console.log('Received a message:', e);
 
@@ -27,15 +31,14 @@ export class VideoController {
             }
 
             const command = data.command;
-            const screen = this.findScreen();
             
             for (const key in command) {
                 switch(key) {
                     case 'newUrl':
-                        this.setVideoUrl(screen, command[key]);
+                        this.setVideoUrl(command[key]);
                         break;
                     case 'newStatus':
-                        this.setVideoStatus(screen, command[key]);
+                        this.setVideoStatus(command[key]);
                         break;
                 }
             }
@@ -45,26 +48,35 @@ export class VideoController {
     disconnect() {
         console.log("Manually disconnecting from the WebSocket.");
         this.socket.close(1000);
-        clearInterval(this.checkInInterval);
     }
 
-    setVideoStatus(screen, enabled) {
-        screen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
+    async setVideoStatus(enabled) {
+        const screen = this.getScreen();
+        const networkedScreen = await NAF.utils.getNetworkedEntity(screen);
+
+        if (NAF.utils.isMine(networkedScreen))
+            networkedScreen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
+        
+        // The component `visible` is not networked, so everyone has to change it on their own local client.
         screen.setAttribute('visible', enabled ? true : false);
     }
 
-    setVideoUrl(screen, newUrl) {
-        screen.setAttribute('media-loader', 'src', newUrl);
+    async setVideoUrl(newUrl) {
+        const screen = this.getScreen();
+        const networkedScreen = await NAF.utils.getNetworkedEntity(screen);
+        
+        if (NAF.utils.isMine(networkedScreen))
+            networkedScreen.setAttribute('media-loader', 'src', newUrl);
     }
     
     sendReminder() {
         const payload = { 'action': 'remind' };
         this.socket.send(JSON.stringify(payload));
-        console.log('Sent a check-in message:', payload);
+        
+        console.log('Sent a check-in message.');
     }
 
-    // TODO change later!
-    findScreen() { 
-        return document.querySelector('[media-video]'); 
+    getScreen() {
+        return document.querySelector(`#${SCREEN_ID}`);
     }
 }
