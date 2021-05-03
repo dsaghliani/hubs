@@ -1,8 +1,7 @@
 // INTERVAL_DURATION: The time, in seconds, for the client to send a 'reminder' message to the WebSocket
 // server, in the name of keeping the connection alive. Disconnection seems to happen in ~600 seconds.
-const INTERVAL_DURATION = 500;
+const INTERVAL_DURATION = 30;
 const WEB_SOCKET_URL = 'wss://qceh63bc59.execute-api.eu-west-1.amazonaws.com/production';
-const SCREEN_ID = 'naf-20BD6EAF-D619-44EE-8222-5A2019D21AC3';
 
 export class VideoController {
     constructor() {
@@ -31,6 +30,7 @@ export class VideoController {
             }
 
             const command = data.command;
+            console.log(command);
             
             for (const key in command) {
                 switch(key) {
@@ -50,33 +50,24 @@ export class VideoController {
         this.socket.close(1000);
     }
 
-    async setVideoStatus(enabled) {
+    setVideoUrl(newUrl) {
         const screen = this.getScreen();
-        const networkedScreen = await NAF.utils.getNetworkedEntity(screen);
-
-        if (NAF.utils.isMine(networkedScreen))
-            networkedScreen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
-        
-        // The component `visible` is not networked, so everyone has to change it on their own local client.
-        screen.setAttribute('visible', enabled ? true : false);
+        screen.setAttribute("media-loader", "src", newUrl);
     }
 
-    async setVideoUrl(newUrl) {
+    setVideoStatus(enabled) {
         const screen = this.getScreen();
-        const networkedScreen = await NAF.utils.getNetworkedEntity(screen);
-        
-        if (NAF.utils.isMine(networkedScreen))
-            networkedScreen.setAttribute('media-loader', 'src', newUrl);
+        screen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
+        screen.setAttribute('visible', enabled ? true : false);
     }
     
     sendReminder() {
         const payload = { 'action': 'remind' };
         this.socket.send(JSON.stringify(payload));
-        
         console.log('Sent a check-in message.');
     }
 
-    getScreen() {
-        return document.querySelector(`#${SCREEN_ID}`);
+    getScreen() { 
+        return document.querySelector('[custom-screen]');
     }
 }

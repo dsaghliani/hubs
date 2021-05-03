@@ -1111,7 +1111,80 @@ document.addEventListener("DOMContentLoaded", async () => {
     environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
   };
 
+  const createScreenIfNeeded = async () => {
+    console.log("Starting custom screen creation process.");
+    // Fetch the latest URL.
+    const STATUS_API_URL = "https://jokias1k6b.execute-api.eu-west-1.amazonaws.com/production";
+    
+    const timeOut = 5000;
+    // const mainTransform = {
+    //   position: { x: -0.256, y: 4.45,  z: 56.4 },
+    //   rotation: { x: 0,      y: -180,  z: 0 },
+    //   scale:    { x: 3.078,  y: 5.078, z: 5.078 }
+    // };
+    const nicheTransform = {
+      position: { x: -0.256, y: 1.322,  z: 56.0 },
+      rotation: { x: 0,      y: -180,  z: 0 },
+      scale:    { x: 2.223,  y: 3.523, z: 2.123 }
+    };
+        
+    const addMediaParams = {
+      src: '',
+      template: "#interactable-media",
+      contentOrigin: ObjectContentOrigins.URL,
+      contentSubtype: null,
+      resolve: true,
+      fitToBox: true,
+      animate: false,
+      mediaOptions: {},
+      networked: false,
+      parentEl: null,
+      linkedEl: null
+    }
+
+    const audioSettings = {
+      mediaVolume: 1.0,
+      mediaDistanceModel: "exponential",
+      mediaRolloffFactor: 15,
+      mediaRefDistance: 25,
+      mediaMaxDistance: 10000,
+      mediaConeInnerAngle: 0,
+      mediaConeOuterAngle: 178,
+      mediaConeOuterGain: 0
+    };
+
+    const latestStatusResponse = await fetch(STATUS_API_URL);
+    if (latestStatusResponse.ok) {
+      const parsedStatusResponse = await latestStatusResponse.json();
+
+      const screenEnabled = parsedStatusResponse.videoStatus;
+      addMediaParams.src = parsedStatusResponse.videoUrl;
+      
+      const {entity } = addMediaWithTransform(nicheTransform, timeOut, ...(Object.values(addMediaParams)));
+      entity.setAttribute("custom-screen", {});
+      entity.setAttribute("pinnable", "pinned", true);
+      entity.setAttribute("media-video", {
+        distanceModel: audioSettings.mediaDistanceModel,
+        rolloffFactor: audioSettings.mediaRolloffFactor,
+        refDistance: audioSettings.mediaRefDistance,
+        maxDistance: audioSettings.mediaMaxDistance,
+        coneInnerAngle: audioSettings.mediaConeInnerAngle,
+        coneOuterAngle: audioSettings.mediaConeOuterAngle,
+        coneOuterGain: audioSettings.mediaConeOuterGain
+      });
+
+      if (!screenEnabled) {
+        entity.setAttribute('video-pause-state', 'paused', true);
+        entity.setAttribute('visible', false);
+      }
+    } else {
+      console.error("Unable to fetch the latest video URL from the API.");
+    }
+  }
+
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
+
+  environmentScene.addEventListener("model-loaded", () => createScreenIfNeeded().then(res => {}).catch(err => {}));
 
   environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {
