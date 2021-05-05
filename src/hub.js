@@ -37,6 +37,8 @@ import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
+import { addMedia } from './utils/media-utils';
+import { ObjectContentOrigins } from './object-types';
 import { VideoController } from "./utils/video-controller";
 
 const videoController = new VideoController();
@@ -1111,23 +1113,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
   };
 
-  const createScreenIfNeeded = async () => {
-    console.log("Starting custom screen creation process.");
-    // Fetch the latest URL.
-    const STATUS_API_URL = "https://jokias1k6b.execute-api.eu-west-1.amazonaws.com/production";
+  const createScreens = async () => {
+    const SCREEN_STATUS_API_URL = "https://jokias1k6b.execute-api.eu-west-1.amazonaws.com/production";
     
-    const timeOut = 5000;
-    // const mainTransform = {
-    //   position: { x: -0.256, y: 4.45,  z: 56.4 },
-    //   rotation: { x: 0,      y: -180,  z: 0 },
-    //   scale:    { x: 3.078,  y: 5.078, z: 5.078 }
-    // };
+    const mainTransform = {
+      position: { x: -0.256, y: 4.45,  z: 56.4 },
+      rotation: { x: 0,      y: -180,  z: 0 },
+      scale:    { x: 3.078,  y: 5.078, z: 5.078 }
+    };
     const nicheTransform = {
       position: { x: -0.256, y: 1.322,  z: 56.0 },
       rotation: { x: 0,      y: -180,  z: 0 },
       scale:    { x: 2.223,  y: 3.523, z: 2.123 }
     };
-        
+    
     const addMediaParams = {
       src: '',
       template: "#interactable-media",
@@ -1140,42 +1139,63 @@ document.addEventListener("DOMContentLoaded", async () => {
       networked: false,
       parentEl: null,
       linkedEl: null
-    }
-
-    const audioSettings = {
-      mediaVolume: 1.0,
-      mediaDistanceModel: "exponential",
-      mediaRolloffFactor: 15,
-      mediaRefDistance: 25,
-      mediaMaxDistance: 10000,
-      mediaConeInnerAngle: 0,
-      mediaConeOuterAngle: 178,
-      mediaConeOuterGain: 0
     };
+    
+    const latestStatusResponse = await fetch(SCREEN_STATUS_API_URL);
 
-    const latestStatusResponse = await fetch(STATUS_API_URL);
     if (latestStatusResponse.ok) {
-      const parsedStatusResponse = await latestStatusResponse.json();
-
-      const screenEnabled = parsedStatusResponse.videoStatus;
-      addMediaParams.src = parsedStatusResponse.videoUrl;
+      const latestStatus = await latestStatusResponse.json();
       
-      const {entity } = addMediaWithTransform(nicheTransform, timeOut, ...(Object.values(addMediaParams)));
-      entity.setAttribute("custom-screen", {});
-      entity.setAttribute("pinnable", "pinned", true);
-      entity.setAttribute("media-video", {
-        distanceModel: audioSettings.mediaDistanceModel,
-        rolloffFactor: audioSettings.mediaRolloffFactor,
-        refDistance: audioSettings.mediaRefDistance,
-        maxDistance: audioSettings.mediaMaxDistance,
-        coneInnerAngle: audioSettings.mediaConeInnerAngle,
-        coneOuterAngle: audioSettings.mediaConeOuterAngle,
-        coneOuterGain: audioSettings.mediaConeOuterGain
-      });
+      for (const screenData of latestStatus) {
+        const screenIndex = screenData.screenIndex;
+        const screenEnabled = screenData.screenEnabled;
+        addMediaParams.src = screenData.videoUrl;
 
-      if (!screenEnabled) {
-        entity.setAttribute('video-pause-state', 'paused', true);
-        entity.setAttribute('visible', false);
+        const transformForThisScreen = screenIndex == 0 ? mainTransform : nicheTransform;
+        
+        const { entity } = addMedia(...(Object.values(addMediaParams)));
+
+        // Hide the entity at first, so its loading animation is not visible,
+        // especially when it's not yet been placed in its intended location.
+        entity.setAttribute("visible", false);
+
+        entity.addEventListener("media-loaded", () => {
+          entity.object3D.position.set(
+            transformForThisScreen.position.x,
+            transformForThisScreen.position.y,
+            transformForThisScreen.position.z,
+          );
+
+          entity.object3D.scale.set(
+            transformForThisScreen.scale.x,
+            transformForThisScreen.scale.y,
+            transformForThisScreen.scale.z,
+          );
+
+          entity.object3D.rotation.set(
+            THREE.Math.degToRad(transformForThisScreen.rotation.x),
+            THREE.Math.degToRad(transformForThisScreen.rotation.y),
+            THREE.Math.degToRad(transformForThisScreen.rotation.z),
+          );
+
+          entity.setAttribute("custom-screen", { screenIndex });
+          entity.setAttribute("pinnable", "pinned", true);
+          
+          if (screenEnabled)
+            entity.setAttribute('visible', true);
+          else
+            entity.setAttribute('video-pause-state', 'paused', true);
+
+          entity.setAttribute("media-video", {
+            distanceModel: "exponential",
+            rolloffFactor: 10,
+            refDistance: 20,
+            maxDistance: 10000,
+            coneInnerAngle: 0,
+            coneOuterAngle: 178,
+            coneOuterGain: 0
+          });
+        });
       }
     } else {
       console.error("Unable to fetch the latest video URL from the API.");
@@ -1184,7 +1204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
-  environmentScene.addEventListener("model-loaded", () => createScreenIfNeeded().then(res => {}).catch(err => {}));
+  environmentScene.addEventListener("model-loaded", () => createScreens().then(() => {}).catch(() => {}));
 
   environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {

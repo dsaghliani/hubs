@@ -1,5 +1,18 @@
 AFRAME.registerComponent("disable-spawn-sfx", {});
-AFRAME.registerComponent("custom-screen", {});
+
+AFRAME.registerComponent("custom-screen", {
+    schema: {
+        // An index of -1 might yet be chosen for some reason; -99999999 less so.
+        screenIndex: { type: 'int', default: -999999999 }
+    }
+});
+
+AFRAME.registerComponent("contains-screen", {
+    schema: {
+        screenId: { default: -1 }
+    }
+});
+
 // AFRAME.registerComponent("screen-ownership-handler", {
 //     schema: {
 //         screenId: { type: 'string' }
@@ -37,8 +50,3 @@ AFRAME.registerComponent("custom-screen", {});
 //         });
 //     }
 // });
-AFRAME.registerComponent("contains-screen", {
-    schema: {
-        screenId: { default: -1 }
-    }
-});

@@ -20,54 +20,67 @@ export class VideoController {
         };
 
         this.socket.onmessage = e => {
-            console.log('Received a message:', e);
-
             try {
                 var data = JSON.parse(e.data);
             } catch (err) {
                 console.log('The message received does not contain valid JSON data.', err);
                 return;
             }
-
-            const command = data.command;
-            console.log(command);
             
-            for (const key in command) {
-                switch(key) {
-                    case 'newUrl':
-                        this.setVideoUrl(command[key]);
-                        break;
-                    case 'newStatus':
-                        this.setVideoStatus(command[key]);
-                        break;
-                }
+            const command = data.command;
+            
+            if (typeof command === 'undefined') {
+                const message = data.message;
+                
+                if (typeof message !== 'undefined')
+                    console.log("Received a check-in acknowledgement. (Pong.)")
+                else
+                    console.log("Received an unknown message:", data);
+                    
+                return;
             }
+            
+            console.log('Received a command:', data);
+            
+            const screenIndex = command.screenIndex;
+            const newUrl = command.videoUrl;
+            const newStatus = command.screenEnabled;
+
+            this.setVideoUrl(screenIndex, newUrl);
+            this.setVideoStatus(screenIndex, newStatus);
+            
         };
     }
 
     disconnect() {
-        console.log("Manually disconnecting from the WebSocket.");
+        console.log("Manually disconnecting from the WebSocket."); 
         this.socket.close(1000);
     }
 
-    setVideoUrl(newUrl) {
-        const screen = this.getScreen();
+    setVideoUrl(screenIndex, newUrl) {
+        const screen = this.getScreen(screenIndex);
         screen.setAttribute("media-loader", "src", newUrl);
     }
 
-    setVideoStatus(enabled) {
-        const screen = this.getScreen();
-        screen.setAttribute('video-pause-state', 'paused', enabled ? false : true);
-        screen.setAttribute('visible', enabled ? true : false);
+    setVideoStatus(screenIndex, enabled) {
+        const screen = this.getScreen(screenIndex);
+        screen.setAttribute('video-pause-state', 'paused', !enabled);
+        screen.setAttribute('visible', enabled);
     }
     
     sendReminder() {
         const payload = { 'action': 'remind' };
         this.socket.send(JSON.stringify(payload));
-        console.log('Sent a check-in message.');
+        console.log('Sent a check-in message. (Ping.)');
     }
 
-    getScreen() { 
-        return document.querySelector('[custom-screen]');
+    getScreen(screenIndex) {
+        const screensInScene = document.querySelectorAll('[custom-screen]');
+        
+        for (const screen of screensInScene) {
+            const customScreen = screen.components['custom-screen'];
+            if (customScreen.data.screenIndex == screenIndex)
+                return screen;
+        }
     }
 }
